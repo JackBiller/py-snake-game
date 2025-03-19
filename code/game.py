@@ -16,9 +16,12 @@ class Game:
         self.fonte_grande = pygame.font.SysFont('Lucida Sans Typewriter', FONTE_GRANDE)
         self.menu = Menu(self.tela, self.fonte, self.fonte_grande)
         
-        # Carrega e redimensiona a imagem da maçã para o placar
+        # Carrega e redimensiona as imagens para o placar
         self.imagem_maca_placar = pygame.image.load('assets/maca.png')
         self.imagem_maca_placar = pygame.transform.scale(self.imagem_maca_placar, (30, 30))
+        
+        self.imagem_raio_placar = pygame.image.load('assets/raio.png')
+        self.imagem_raio_placar = pygame.transform.scale(self.imagem_raio_placar, (30, 30))
         
         self.jogando = True
         self.velocidade = 10
@@ -75,9 +78,12 @@ class Game:
             self.tela.blit(self.imagem_maca_placar, (10, 5))  # Desenha a maçã
             self.tela.blit(texto_pontuacao, (45, 5))  # Desenha a pontuação após a maçã
             
-            # Renderiza o texto de velocidade
-            texto_velocidade = self.fonte.render(f'Velocidade: {velocidade_texto}', True, BRANCO)
-            self.tela.blit(texto_velocidade, (LARGURA - texto_velocidade.get_width() - 10, 5))
+            # Renderiza a velocidade com o ícone do raio
+            texto_velocidade = self.fonte.render(f': {velocidade_texto}', True, BRANCO)
+            largura_texto = texto_velocidade.get_width()
+            pos_x_raio = LARGURA - largura_texto - 45
+            self.tela.blit(self.imagem_raio_placar, (pos_x_raio, 5))  # Desenha o raio
+            self.tela.blit(texto_velocidade, (LARGURA - largura_texto - 10, 5))  # Desenha o texto da velocidade
 
             pygame.display.update()
             clock.tick(velocidade)
@@ -100,8 +106,8 @@ class Game:
                     self.jogar_novamente = True
                     continue
             
-            elif escolha_menu == 'DIFICULDADE':
-                escolha_dif = self.menu.mostrar_dificuldade()
+            elif escolha_menu == 'VELOCIDADE':
+                escolha_dif = self.menu.mostrar_velocidade()
                 if escolha_dif == 'LENTO':
                     self.velocidade = 8
                 elif escolha_dif == 'MODERADO':

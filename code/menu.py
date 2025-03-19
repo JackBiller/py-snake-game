@@ -36,7 +36,7 @@ class Menu:
     def mostrar_menu_principal(self):
         """Mostra o menu principal do jogo."""
         opcao_selecionada = 0
-        opcoes = ['JOGAR', 'DIFICULDADE', 'SAIR']
+        opcoes = ['JOGAR', 'VELOCIDADE', 'SAIR']
         
         while True:
             self._desenhar_fundo(self.imagem_menu)
@@ -68,7 +68,7 @@ class Menu:
                     elif evento.key == pygame.K_ESCAPE:
                         return 'SAIR'
 
-    def mostrar_dificuldade(self):
+    def mostrar_velocidade(self):
         """Mostra o menu de seleção de velocidade."""
         opcao_selecionada = 0
         opcoes = ['LENTO', 'MODERADO', 'RÁPIDO', 'VOLTAR']
@@ -153,7 +153,7 @@ class Menu:
                     elif evento.key == pygame.K_ESCAPE:
                         return False
 
-    def mostrar_menu_pausa(self, cobra, comida, pontuacao, dificuldade_texto):
+    def mostrar_menu_pausa(self, cobra, comida, pontuacao, velocidade_texto):
         """
         Mostra o menu de pausa durante o jogo.
         
@@ -161,14 +161,17 @@ class Menu:
             cobra: Instância da cobra para desenhar no fundo
             comida: Instância da comida para desenhar no fundo
             pontuacao: Pontuação atual do jogador
-            dificuldade_texto: Texto da dificuldade atual
+            velocidade_texto: Texto da velocidade atual
         """
         opcao_selecionada = 0
         opcoes = ['CONTINUAR', 'ENCERRAR']
         
-        # Carrega e redimensiona a imagem da maçã para o placar
+        # Carrega e redimensiona as imagens para o placar
         imagem_maca_placar = pygame.image.load('assets/maca.png')
         imagem_maca_placar = pygame.transform.scale(imagem_maca_placar, (30, 30))
+        
+        imagem_raio_placar = pygame.image.load('assets/raio.png')
+        imagem_raio_placar = pygame.transform.scale(imagem_raio_placar, (30, 30))
         
         while True:
             # Desenha o estado atual do jogo
@@ -186,9 +189,12 @@ class Menu:
             self.tela.blit(imagem_maca_placar, (10, 5))
             self.tela.blit(texto_pontuacao, (45, 5))
             
-            # Renderiza o texto de dificuldade
-            texto_dificuldade = self.fonte.render(f'Dificuldade: {dificuldade_texto}', True, BRANCO)
-            self.tela.blit(texto_dificuldade, (LARGURA - texto_dificuldade.get_width() - 10, 5))
+            # Renderiza a velocidade com o ícone do raio
+            texto_velocidade = self.fonte.render(f': {velocidade_texto}', True, BRANCO)
+            largura_texto = texto_velocidade.get_width()
+            pos_x_raio = LARGURA - largura_texto - 45
+            self.tela.blit(imagem_raio_placar, (pos_x_raio, 5))
+            self.tela.blit(texto_velocidade, (LARGURA - largura_texto - 10, 5))
             
             # Adiciona um overlay semi-transparente para escurecer o jogo
             overlay = pygame.Surface((LARGURA, ALTURA))

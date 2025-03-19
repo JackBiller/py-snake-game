@@ -13,7 +13,7 @@ CINZA = (128, 128, 128)
 LARGURA = 800
 ALTURA = 600
 TAMANHO_BLOCO = 20
-MARGEM_SUPERIOR = 40  # Espaço para pontuação e dificuldade
+MARGEM_SUPERIOR = 40  # Espaço para pontuação e velocidade
 ALTURA_JOGAVEL = ALTURA - MARGEM_SUPERIOR  # Altura disponível para o jogo
 
 # Índices dos sprites
