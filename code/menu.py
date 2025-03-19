@@ -69,14 +69,14 @@ class Menu:
                         return 'SAIR'
 
     def mostrar_dificuldade(self):
-        """Mostra o menu de seleção de dificuldade."""
+        """Mostra o menu de seleção de velocidade."""
         opcao_selecionada = 0
-        opcoes = ['FÁCIL', 'MÉDIO', 'DIFÍCIL', 'VOLTAR']
+        opcoes = ['LENTO', 'MODERADO', 'RÁPIDO', 'VOLTAR']
         
         while True:
             self._desenhar_fundo(self.imagem_config)
             
-            titulo = self.fonte_grande.render('DIFICULDADE', True, VERDE)
+            titulo = self.fonte_grande.render('VELOCIDADE', True, VERDE)
             
             # Renderiza as opções com cores diferentes baseado na seleção
             for i, opcao in enumerate(opcoes):
@@ -151,4 +151,75 @@ class Menu:
                         else:  # Sair
                             return False
                     elif evento.key == pygame.K_ESCAPE:
-                        return False 
+                        return False
+
+    def mostrar_menu_pausa(self, cobra, comida, pontuacao, dificuldade_texto):
+        """
+        Mostra o menu de pausa durante o jogo.
+        
+        Args:
+            cobra: Instância da cobra para desenhar no fundo
+            comida: Instância da comida para desenhar no fundo
+            pontuacao: Pontuação atual do jogador
+            dificuldade_texto: Texto da dificuldade atual
+        """
+        opcao_selecionada = 0
+        opcoes = ['CONTINUAR', 'ENCERRAR']
+        
+        # Carrega e redimensiona a imagem da maçã para o placar
+        imagem_maca_placar = pygame.image.load('assets/maca.png')
+        imagem_maca_placar = pygame.transform.scale(imagem_maca_placar, (30, 30))
+        
+        while True:
+            # Desenha o estado atual do jogo
+            self.tela.fill(PRETO)
+            
+            # Desenha a linha divisória
+            pygame.draw.line(self.tela, CINZA, (0, MARGEM_SUPERIOR), (LARGURA, MARGEM_SUPERIOR), 2)
+            
+            # Desenha a cobra e a comida
+            cobra.desenhar(self.tela)
+            comida.desenhar(self.tela)
+            
+            # Renderiza a pontuação com o ícone da maçã
+            texto_pontuacao = self.fonte.render(f': {pontuacao}', True, BRANCO)
+            self.tela.blit(imagem_maca_placar, (10, 5))
+            self.tela.blit(texto_pontuacao, (45, 5))
+            
+            # Renderiza o texto de dificuldade
+            texto_dificuldade = self.fonte.render(f'Dificuldade: {dificuldade_texto}', True, BRANCO)
+            self.tela.blit(texto_dificuldade, (LARGURA - texto_dificuldade.get_width() - 10, 5))
+            
+            # Adiciona um overlay semi-transparente para escurecer o jogo
+            overlay = pygame.Surface((LARGURA, ALTURA))
+            overlay.fill(PRETO)
+            overlay.set_alpha(128)
+            self.tela.blit(overlay, (0, 0))
+            
+            # Desenha o menu de pausa
+            titulo = self.fonte_grande.render('JOGO PAUSADO', True, VERDE)
+            rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/3))
+            self.tela.blit(titulo, rect_titulo)
+            
+            # Renderiza as opções com cores diferentes baseado na seleção
+            for i, opcao in enumerate(opcoes):
+                cor = AMARELO if i == opcao_selecionada else BRANCO
+                texto = self.fonte.render(f'{opcao}', True, cor)
+                rect = texto.get_rect(center=(LARGURA/2, ALTURA/2 + i * 50))
+                self.tela.blit(texto, rect)
+            
+            pygame.display.update()
+            
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    return 'ENCERRAR'
+                
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_UP:
+                        opcao_selecionada = (opcao_selecionada - 1) % len(opcoes)
+                    elif evento.key == pygame.K_DOWN:
+                        opcao_selecionada = (opcao_selecionada + 1) % len(opcoes)
+                    elif evento.key == pygame.K_RETURN:
+                        return opcoes[opcao_selecionada]
+                    elif evento.key == pygame.K_ESCAPE:
+                        return 'CONTINUAR' 

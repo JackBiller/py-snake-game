@@ -15,6 +15,11 @@ class Game:
         self.fonte = pygame.font.SysFont('Lucida Sans Typewriter', FONTE_NORMAL)
         self.fonte_grande = pygame.font.SysFont('Lucida Sans Typewriter', FONTE_GRANDE)
         self.menu = Menu(self.tela, self.fonte, self.fonte_grande)
+        
+        # Carrega e redimensiona a imagem da maçã para o placar
+        self.imagem_maca_placar = pygame.image.load('assets/maca.png')
+        self.imagem_maca_placar = pygame.transform.scale(self.imagem_maca_placar, (30, 30))
+        
         self.jogando = True
         self.velocidade = 10
         self.jogar_novamente = False
@@ -27,18 +32,25 @@ class Game:
         rodando = True
 
         if velocidade == 8:
-            dificuldade_texto = "FÁCIL"
+            velocidade_texto = "LENTO"
         elif velocidade == 10:
-            dificuldade_texto = "MÉDIO"
+            velocidade_texto = "MODERADO"
         else:
-            dificuldade_texto = "DIFÍCIL"
+            velocidade_texto = "RÁPIDO"
 
         while rodando:
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
                     return False
                 elif evento.type == pygame.KEYDOWN:
-                    cobra.mudar_direcao(evento.key)
+                    if evento.key == pygame.K_ESCAPE:
+                        # Mostra o menu de pausa com o estado atual do jogo
+                        escolha = self.menu.mostrar_menu_pausa(cobra, comida, pontuacao, velocidade_texto)
+                        if escolha == 'ENCERRAR':
+                            return self.menu.mostrar_tela_final(pontuacao)
+                        continue  # Pula o resto do loop se estiver pausado
+                    else:
+                        cobra.mudar_direcao(evento.key)
 
             cobra.mover()
 
@@ -58,11 +70,14 @@ class Game:
             cobra.desenhar(self.tela)
             comida.desenhar(self.tela)
 
-            # Renderiza os textos de pontuação e dificuldade
-            texto_pontuacao = self.fonte.render(f'Maçãs: {pontuacao}', True, BRANCO)
-            texto_dificuldade = self.fonte.render(f'Dificuldade: {dificuldade_texto}', True, BRANCO)
-            self.tela.blit(texto_pontuacao, (10, 5))  # Ajustado para ficar acima da linha
-            self.tela.blit(texto_dificuldade, (LARGURA - texto_dificuldade.get_width() - 10, 5))  # Ajustado para ficar acima da linha
+            # Renderiza a pontuação com o ícone da maçã
+            texto_pontuacao = self.fonte.render(f': {pontuacao}', True, BRANCO)
+            self.tela.blit(self.imagem_maca_placar, (10, 5))  # Desenha a maçã
+            self.tela.blit(texto_pontuacao, (45, 5))  # Desenha a pontuação após a maçã
+            
+            # Renderiza o texto de velocidade
+            texto_velocidade = self.fonte.render(f'Velocidade: {velocidade_texto}', True, BRANCO)
+            self.tela.blit(texto_velocidade, (LARGURA - texto_velocidade.get_width() - 10, 5))
 
             pygame.display.update()
             clock.tick(velocidade)
@@ -87,11 +102,11 @@ class Game:
             
             elif escolha_menu == 'DIFICULDADE':
                 escolha_dif = self.menu.mostrar_dificuldade()
-                if escolha_dif == 'FÁCIL':
+                if escolha_dif == 'LENTO':
                     self.velocidade = 8
-                elif escolha_dif == 'MÉDIO':
+                elif escolha_dif == 'MODERADO':
                     self.velocidade = 10
-                elif escolha_dif == 'DIFÍCIL':
+                elif escolha_dif == 'RÁPIDO':
                     self.velocidade = 12
                 elif escolha_dif == 'VOLTAR':
                     continue
