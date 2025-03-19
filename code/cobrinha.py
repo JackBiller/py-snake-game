@@ -10,7 +10,8 @@ class Cobrinha:
             sprite = pygame.transform.scale(sprite, (TAMANHO_BLOCO, TAMANHO_BLOCO))
             sprites_cobra.append(sprite)
 
-        self.posicao = [(LARGURA//2, ALTURA//2)]
+        # Posição inicial ajustada para a área jogável
+        self.posicao = [(LARGURA//2, (ALTURA_JOGAVEL//2) + MARGEM_SUPERIOR)]
         self.direcao = [TAMANHO_BLOCO, 0]
         self.comprimento = 3
         self.sprites = sprites_cobra
@@ -25,15 +26,16 @@ class Cobrinha:
         nova_x = self.posicao[0][0] + self.direcao[0]
         nova_y = self.posicao[0][1] + self.direcao[1]
         
-        # Atravessa as bordas
+        # Atravessa as bordas laterais
         if nova_x >= LARGURA:
             nova_x = 0
         elif nova_x < 0:
             nova_x = LARGURA - TAMANHO_BLOCO
             
+        # Limita movimento vertical à área jogável
         if nova_y >= ALTURA:
-            nova_y = 0
-        elif nova_y < 0:
+            nova_y = MARGEM_SUPERIOR
+        elif nova_y < MARGEM_SUPERIOR:
             nova_y = ALTURA - TAMANHO_BLOCO
             
         nova_posicao = (nova_x, nova_y)

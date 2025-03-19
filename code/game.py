@@ -3,7 +3,7 @@ import pygame
 from code.const import *
 from code.cobrinha import Cobrinha
 from code.comida import Comida
-from code.menu import mostrar_tela_final, mostrar_menu, mostrar_dificuldade
+from code.menu import Menu
 
 class Game:
     def __init__(self):
@@ -14,6 +14,7 @@ class Game:
 
         self.fonte = pygame.font.SysFont('Lucida Sans Typewriter', FONTE_NORMAL)
         self.fonte_grande = pygame.font.SysFont('Lucida Sans Typewriter', FONTE_GRANDE)
+        self.menu = Menu(self.tela, self.fonte, self.fonte_grande)
         self.jogando = True
         self.velocidade = 10
         self.jogar_novamente = False
@@ -50,23 +51,28 @@ class Game:
                 rodando = False
 
             self.tela.fill(PRETO)
+            
+            # Desenha a linha divisória
+            pygame.draw.line(self.tela, CINZA, (0, MARGEM_SUPERIOR), (LARGURA, MARGEM_SUPERIOR), 2)
+            
             cobra.desenhar(self.tela)
             comida.desenhar(self.tela)
 
+            # Renderiza os textos de pontuação e dificuldade
             texto_pontuacao = self.fonte.render(f'Maçãs: {pontuacao}', True, BRANCO)
             texto_dificuldade = self.fonte.render(f'Dificuldade: {dificuldade_texto}', True, BRANCO)
-            self.tela.blit(texto_pontuacao, (10, 10))
-            self.tela.blit(texto_dificuldade, (LARGURA - texto_dificuldade.get_width() - 10, 10))
+            self.tela.blit(texto_pontuacao, (10, 5))  # Ajustado para ficar acima da linha
+            self.tela.blit(texto_dificuldade, (LARGURA - texto_dificuldade.get_width() - 10, 5))  # Ajustado para ficar acima da linha
 
             pygame.display.update()
             clock.tick(velocidade)
 
-        return mostrar_tela_final(self.tela, self.fonte, self.fonte_grande, pontuacao)
+        return self.menu.mostrar_tela_final(pontuacao)
     
     def run(self):
         while self.jogando:
             if not self.jogar_novamente:
-                escolha_menu = mostrar_menu(self.tela, self.fonte, self.fonte_grande)
+                escolha_menu = self.menu.mostrar_menu_principal()
             
             if escolha_menu == 'JOGAR' or self.jogar_novamente:
                 self.jogar_novamente = False
@@ -80,7 +86,7 @@ class Game:
                     continue
             
             elif escolha_menu == 'DIFICULDADE':
-                escolha_dif = mostrar_dificuldade(self.tela, self.fonte, self.fonte_grande)
+                escolha_dif = self.menu.mostrar_dificuldade()
                 if escolha_dif == 'FÁCIL':
                     self.velocidade = 8
                 elif escolha_dif == 'MÉDIO':

@@ -5,7 +5,6 @@ from code.const import *
 
 class Comida:
     def __init__(self, cobra):
-        # Carrega as imagens
         imagem_maca = pygame.image.load('assets/maca.png')
         imagem_maca = pygame.transform.scale(imagem_maca, (TAMANHO_BLOCO, TAMANHO_BLOCO))
         self.posicao = self.gerar_posicao(cobra)
@@ -26,7 +25,7 @@ class Comida:
         """
         while True:
             x = random.randrange(0, LARGURA, TAMANHO_BLOCO)
-            y = random.randrange(0, ALTURA, TAMANHO_BLOCO)
+            y = random.randrange(MARGEM_SUPERIOR, ALTURA, TAMANHO_BLOCO)
             posicao = (x, y)
             # Verifica se a posição não está ocupada pela cobra
             if posicao not in cobra.posicao:
