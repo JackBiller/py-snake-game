@@ -4,6 +4,7 @@ from code.const import *
 from code.cobrinha import Cobrinha
 from code.comida import Comida
 from code.menu import Menu
+from code.database import Database
 
 class Game:
     def __init__(self):
@@ -23,8 +24,15 @@ class Game:
         self.imagem_raio_placar = pygame.image.load('assets/raio.png')
         self.imagem_raio_placar = pygame.transform.scale(self.imagem_raio_placar, (30, 30))
         
+        # Carrega e redimensiona a imagem de fundo
+        self.imagem_fundo = pygame.image.load('assets/fundo-game.png')
+        self.imagem_fundo = pygame.transform.scale(self.imagem_fundo, (LARGURA, ALTURA))
+        
+        # Inicializa o banco de dados e carrega a última velocidade configurada
+        self.db = Database()
+        self.velocidade = self.db.obter_velocidade()
+        
         self.jogando = True
-        self.velocidade = 10
         self.jogar_novamente = False
 
     def jogar(self, velocidade=10):
@@ -33,6 +41,11 @@ class Game:
         comida = Comida(cobra)
         pontuacao = 0
         rodando = True
+        
+        # Inicializa o cronômetro
+        tempo_inicio = pygame.time.get_ticks()
+        tempo_pausado = 0
+        tempo_total_pausado = 0
 
         if velocidade == 8:
             velocidade_texto = "LENTO"
@@ -47,25 +60,39 @@ class Game:
                     return False
                 elif evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_ESCAPE:
+                        # Registra o tempo quando pausou
+                        tempo_pausado = pygame.time.get_ticks()
                         # Mostra o menu de pausa com o estado atual do jogo
                         escolha = self.menu.mostrar_menu_pausa(cobra, comida, pontuacao, velocidade_texto)
                         if escolha == 'ENCERRAR':
+                            # Calcula o tempo total de jogo em segundos
+                            tempo_total = (pygame.time.get_ticks() - tempo_inicio - tempo_total_pausado) // 1000
+                            # Salva a pontuação antes de encerrar
+                            self.db.salvar_partida(pontuacao, velocidade_texto, tempo_total)
                             return self.menu.mostrar_tela_final(pontuacao)
+                        # Adiciona o tempo que ficou pausado ao total
+                        tempo_total_pausado += pygame.time.get_ticks() - tempo_pausado
                         continue  # Pula o resto do loop se estiver pausado
                     else:
                         cobra.mudar_direcao(evento.key)
 
             cobra.mover()
 
+            # Verifica se a cobra coletou a maçã
             if cobra.posicao[0] == comida.posicao:
                 cobra.crescer()
                 comida = Comida(cobra)
                 pontuacao += 1
+            
+            # Debug: Mostra as posições
+            texto_debug = self.fonte.render(f'Cobra: {cobra.posicao[0]} Maçã: {comida.posicao}', True, BRANCO)
+            self.tela.blit(texto_debug, (10, ALTURA - 30))
 
             if cobra.colisao():
                 rodando = False
 
-            self.tela.fill(PRETO)
+            # Desenha o fundo
+            self.tela.blit(self.imagem_fundo, (0, 0))
             
             # Desenha a linha divisória
             pygame.draw.line(self.tela, CINZA, (0, MARGEM_SUPERIOR), (LARGURA, MARGEM_SUPERIOR), 2)
@@ -75,19 +102,30 @@ class Game:
 
             # Renderiza a pontuação com o ícone da maçã
             texto_pontuacao = self.fonte.render(f': {pontuacao}', True, BRANCO)
-            self.tela.blit(self.imagem_maca_placar, (10, 5))  # Desenha a maçã
-            self.tela.blit(texto_pontuacao, (45, 5))  # Desenha a pontuação após a maçã
+            self.tela.blit(self.imagem_maca_placar, (10, 10))  # Desenha a maçã
+            self.tela.blit(texto_pontuacao, (45, 10))  # Desenha a pontuação após a maçã
             
             # Renderiza a velocidade com o ícone do raio
             texto_velocidade = self.fonte.render(f': {velocidade_texto}', True, BRANCO)
             largura_texto = texto_velocidade.get_width()
             pos_x_raio = LARGURA - largura_texto - 45
-            self.tela.blit(self.imagem_raio_placar, (pos_x_raio, 5))  # Desenha o raio
-            self.tela.blit(texto_velocidade, (LARGURA - largura_texto - 10, 5))  # Desenha o texto da velocidade
+            self.tela.blit(self.imagem_raio_placar, (pos_x_raio, 10))  # Desenha o raio
+            self.tela.blit(texto_velocidade, (LARGURA - largura_texto - 10, 10))  # Desenha o texto da velocidade
+            
+            # Calcula e renderiza o tempo de jogo
+            tempo_atual = (pygame.time.get_ticks() - tempo_inicio - tempo_total_pausado) // 1000
+            minutos = tempo_atual // 60
+            segundos = tempo_atual % 60
+            texto_tempo = self.fonte.render(f'Tempo: {minutos:02d}:{segundos:02d}', True, BRANCO)
+            self.tela.blit(texto_tempo, (LARGURA // 2 - texto_tempo.get_width() // 2, 10))
 
             pygame.display.update()
             clock.tick(velocidade)
 
+        # Calcula o tempo total de jogo em segundos
+        tempo_total = (pygame.time.get_ticks() - tempo_inicio - tempo_total_pausado) // 1000
+        # Salva a pontuação ao fim do jogo
+        self.db.salvar_partida(pontuacao, velocidade_texto, tempo_total)
         return self.menu.mostrar_tela_final(pontuacao)
     
     def run(self):
@@ -116,8 +154,18 @@ class Game:
                     self.velocidade = 12
                 elif escolha_dif == 'VOLTAR':
                     continue
+                
+                # Salva a nova velocidade no banco de dados
+                if escolha_dif != 'VOLTAR':
+                    self.db.salvar_velocidade(self.velocidade)
+            
+            elif escolha_menu == 'HISTÓRICO':
+                self.menu.mostrar_historico()
+                continue
             
             elif escolha_menu == 'SAIR':
                 self.jogando = False
 
+        # Fecha a conexão com o banco de dados ao sair
+        self.db.fechar()
         pygame.quit()

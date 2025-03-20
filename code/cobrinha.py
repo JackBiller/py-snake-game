@@ -3,7 +3,7 @@ from code.const import *
 
 class Cobrinha:
     def __init__(self):
-        sprite_sheet = pygame.image.load('assets/cobrinha.png')
+        sprite_sheet = pygame.image.load('assets/cobrinha-marrom.png')
         sprites_cobra = []
         for i in range(7):
             sprite = sprite_sheet.subsurface((0, i * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE))
@@ -37,6 +37,10 @@ class Cobrinha:
             nova_y = MARGEM_SUPERIOR
         elif nova_y < MARGEM_SUPERIOR:
             nova_y = ALTURA - TAMANHO_BLOCO
+            
+        # Garante que a posição está alinhada com a grade
+        nova_x = (nova_x // TAMANHO_BLOCO) * TAMANHO_BLOCO
+        nova_y = ((nova_y - MARGEM_SUPERIOR) // TAMANHO_BLOCO) * TAMANHO_BLOCO + MARGEM_SUPERIOR
             
         nova_posicao = (nova_x, nova_y)
         self.posicao.insert(0, nova_posicao)
