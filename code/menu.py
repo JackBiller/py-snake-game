@@ -1,5 +1,6 @@
 import pygame
 from code.const import *
+from datetime import datetime
 
 class Menu:
     def __init__(self, tela, fonte, fonte_grande):
@@ -232,7 +233,7 @@ class Menu:
                         return 'CONTINUAR'
 
     def mostrar_historico(self):
-        """Mostra o histórico das 10 melhores pontuações."""
+        """Mostra o histórico das 9 melhores pontuações."""
         opcao_selecionada = 0
         opcoes = ['VOLTAR']
         
@@ -246,18 +247,30 @@ class Menu:
             # Obtém as pontuações do banco de dados
             from code.database import Database
             db = Database()
-            pontuacoes = db.obter_melhores_pontuacoes()
+            pontuacoes = db.obter_melhores_pontuacoes(limite=9)  # Limita a 9 resultados
             db.fechar()
             
             # Renderiza as pontuações
-            for i, (pontuacao, velocidade, data_hora, tempo_jogo) in enumerate(pontuacoes):
-                data_formatada = data_hora.strftime("%d/%m/%Y %H:%M")
-                minutos = tempo_jogo // 60
-                segundos = tempo_jogo % 60
-                texto = f"{pontuacao} maçãs - {velocidade} - {minutos:02d}:{segundos:02d} - {data_formatada}"
-                texto_surface = self.fonte.render(texto, True, BRANCO)
-                rect = texto_surface.get_rect(center=(LARGURA/2, ALTURA/4 + i * 40))
-                self.tela.blit(texto_surface, rect)
+            for i, (pontuacao, velocidade, data_hora_str, tempo_jogo) in enumerate(pontuacoes):
+                try:
+                    # Tenta converter a string de data/hora em objeto datetime
+                    # Primeiro tenta com o formato que inclui milissegundos
+                    try:
+                        data_hora = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M:%S.%f")
+                    except ValueError:
+                        # Se falhar, tenta sem milissegundos
+                        data_hora = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M:%S")
+                    
+                    data_formatada = data_hora.strftime("%d/%m/%Y %H:%M")
+                    minutos = tempo_jogo // 60
+                    segundos = tempo_jogo % 60
+                    texto = f"{pontuacao} maçãs - {velocidade} - {minutos:02d}:{segundos:02d} - {data_formatada}"
+                    texto_surface = self.fonte.render(texto, True, BRANCO)
+                    rect = texto_surface.get_rect(center=(LARGURA/2, ALTURA/4 + i * 40))
+                    self.tela.blit(texto_surface, rect)
+                except Exception as e:
+                    print(f"Erro ao processar data/hora: {e}")
+                    continue
             
             # Renderiza a opção de voltar
             texto = self.fonte.render('VOLTAR', True, AMARELO)

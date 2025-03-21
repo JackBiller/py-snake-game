@@ -98,35 +98,22 @@ class Database:
         ''', (pontuacao, velocidade_texto, datetime.now(), tempo_jogo))
         self.connection.commit()
 
-    def obter_melhores_pontuacoes(self, limite=10):
-        """
-        Retorna as melhores pontuações registradas.
+    def obter_melhores_pontuacoes(self, limite=9):
+        """Obtém as melhores pontuações do histórico.
         
         Args:
-            limite: Número máximo de resultados a retornar
+            limite (int): Número máximo de resultados a retornar. Padrão é 9.
             
         Returns:
             list: Lista de tuplas (pontuacao, velocidade, data_hora, tempo_jogo)
         """
         self.cursor.execute('''
-            SELECT pontuacao, velocidade, datetime(data_hora), tempo_jogo
-            FROM historico_partidas
-            ORDER BY pontuacao DESC
+            SELECT pontuacao, velocidade, data_hora, tempo_jogo 
+            FROM historico_partidas 
+            ORDER BY pontuacao DESC, tempo_jogo ASC 
             LIMIT ?
         ''', (limite,))
-        resultados = self.cursor.fetchall()
-        
-        # Converte as strings de data/hora em objetos datetime
-        resultados_formatados = []
-        for pontuacao, velocidade, data_hora_str, tempo_jogo in resultados:
-            try:
-                data_hora = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M:%S")
-                resultados_formatados.append((pontuacao, velocidade, data_hora, tempo_jogo))
-            except ValueError:
-                # Se houver erro na conversão, mantém a string original
-                resultados_formatados.append((pontuacao, velocidade, data_hora_str, tempo_jogo))
-        
-        return resultados_formatados
+        return self.cursor.fetchall()
 
     def salvar_velocidade(self, velocidade):
         """

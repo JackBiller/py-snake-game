@@ -102,22 +102,24 @@ class Game:
 
             # Renderiza a pontuação com o ícone da maçã
             texto_pontuacao = self.fonte.render(f': {pontuacao}', True, BRANCO)
-            self.tela.blit(self.imagem_maca_placar, (10, 10))  # Desenha a maçã
-            self.tela.blit(texto_pontuacao, (45, 10))  # Desenha a pontuação após a maçã
+            self.tela.blit(self.imagem_maca_placar, (10, 10))
+            self.tela.blit(texto_pontuacao, (45, 10))
             
             # Renderiza a velocidade com o ícone do raio
             texto_velocidade = self.fonte.render(f': {velocidade_texto}', True, BRANCO)
             largura_texto = texto_velocidade.get_width()
             pos_x_raio = LARGURA - largura_texto - 45
-            self.tela.blit(self.imagem_raio_placar, (pos_x_raio, 10))  # Desenha o raio
-            self.tela.blit(texto_velocidade, (LARGURA - largura_texto - 10, 10))  # Desenha o texto da velocidade
+            self.tela.blit(self.imagem_raio_placar, (pos_x_raio, 10))
+            self.tela.blit(texto_velocidade, (LARGURA - largura_texto - 10, 10))
             
-            # Calcula e renderiza o tempo de jogo
+            # Renderiza o cronômetro centralizado
             tempo_atual = (pygame.time.get_ticks() - tempo_inicio - tempo_total_pausado) // 1000
             minutos = tempo_atual // 60
             segundos = tempo_atual % 60
-            texto_tempo = self.fonte.render(f'Tempo: {minutos:02d}:{segundos:02d}', True, BRANCO)
-            self.tela.blit(texto_tempo, (LARGURA // 2 - texto_tempo.get_width() // 2, 10))
+            texto_tempo = self.fonte.render(f'{minutos:02d}:{segundos:02d}', True, BRANCO)
+            # Centraliza o texto na tela
+            pos_x_tempo = LARGURA // 2 - texto_tempo.get_width() // 2
+            self.tela.blit(texto_tempo, (pos_x_tempo, 10))
 
             pygame.display.update()
             clock.tick(velocidade)
