@@ -7,6 +7,12 @@ class Database:
         self.connection = sqlite3.connect('snake_game.db')
         self.cursor = self.connection.cursor()
         self._criar_tabelas()
+        
+        # Inicializa as moedas se não existirem
+        self.cursor.execute('SELECT COUNT(*) FROM configuracoes WHERE chave = "moedas"')
+        if self.cursor.fetchone()[0] == 0:
+            self.cursor.execute('INSERT INTO configuracoes (chave, valor) VALUES (?, ?)', ('moedas', '0'))
+            self.connection.commit()
 
     def _criar_tabelas(self):
         """Cria as tabelas necessárias se não existirem."""
@@ -66,20 +72,52 @@ class Database:
         tabela_existe = self.cursor.fetchone() is not None
 
         if not tabela_existe:
-            # Cria a tabela configuracoes
+            # Cria a tabela configuracoes com a nova estrutura
             self.cursor.execute('''
                 CREATE TABLE configuracoes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    velocidade INTEGER NOT NULL,
-                    ultima_atualizacao DATETIME NOT NULL
+                    chave TEXT NOT NULL UNIQUE,
+                    valor TEXT NOT NULL
                 )
             ''')
             
-            # Insere configuração padrão
+            # Insere configurações padrão
             self.cursor.execute('''
-                INSERT INTO configuracoes (velocidade, ultima_atualizacao)
-                VALUES (?, ?)
-            ''', (10, datetime.now()))
+                INSERT INTO configuracoes (chave, valor)
+                VALUES 
+                    ('velocidade', '10'),
+                    ('moedas', '0')
+            ''')
+        else:
+            # Verifica se a tabela tem a estrutura correta
+            self.cursor.execute('PRAGMA table_info(configuracoes)')
+            colunas = self.cursor.fetchall()
+            tem_coluna_chave = any(coluna[1] == 'chave' for coluna in colunas)
+            tem_coluna_valor = any(coluna[1] == 'valor' for coluna in colunas)
+            
+            if not (tem_coluna_chave and tem_coluna_valor):
+                # Cria uma tabela temporária com a nova estrutura
+                self.cursor.execute('''
+                    CREATE TABLE configuracoes_temp (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        chave TEXT NOT NULL UNIQUE,
+                        valor TEXT NOT NULL
+                    )
+                ''')
+                
+                # Insere as configurações padrão
+                self.cursor.execute('''
+                    INSERT INTO configuracoes_temp (chave, valor)
+                    VALUES 
+                        ('velocidade', '10'),
+                        ('moedas', '0')
+                ''')
+                
+                # Remove a tabela antiga
+                self.cursor.execute('DROP TABLE configuracoes')
+                
+                # Renomeia a tabela temporária
+                self.cursor.execute('ALTER TABLE configuracoes_temp RENAME TO configuracoes')
 
         self.connection.commit()
 
@@ -124,9 +162,9 @@ class Database:
         """
         self.cursor.execute('''
             UPDATE configuracoes
-            SET velocidade = ?, ultima_atualizacao = ?
-            WHERE id = 1
-        ''', (velocidade, datetime.now()))
+            SET valor = ?
+            WHERE chave = 'velocidade'
+        ''', (str(velocidade),))
         self.connection.commit()
 
     def obter_velocidade(self):
@@ -136,9 +174,48 @@ class Database:
         Returns:
             int: Valor da velocidade
         """
-        self.cursor.execute('SELECT velocidade FROM configuracoes WHERE id = 1')
-        return self.cursor.fetchone()[0]
+        self.cursor.execute('SELECT valor FROM configuracoes WHERE chave = "velocidade"')
+        return int(self.cursor.fetchone()[0])
 
     def fechar(self):
         """Fecha a conexão com o banco de dados."""
-        self.connection.close() 
+        self.connection.close()
+
+    def calcular_moedas(self, pontuacao, velocidade):
+        """Calcula quantas moedas o jogador ganhou baseado na pontuação e velocidade.
+        
+        Args:
+            pontuacao (int): Número de maçãs coletadas
+            velocidade (str): Velocidade do jogo ('LENTO', 'MODERADO' ou 'RÁPIDO')
+            
+        Returns:
+            int: Número de moedas ganhas
+        """
+        # Define os pesos para cada velocidade
+        pesos = {
+            'LENTO': 1,
+            'MODERADO': 2,
+            'RÁPIDO': 3
+        }
+        
+        # Calcula as moedas baseado na pontuação e velocidade
+        moedas = pontuacao * pesos.get(velocidade, 1)
+        return moedas
+
+    def adicionar_moedas(self, moedas):
+        """Adiciona moedas ao total do jogador.
+        
+        Args:
+            moedas (int): Número de moedas a adicionar
+        """
+        self.cursor.execute('UPDATE configuracoes SET valor = CAST(valor AS INTEGER) + ? WHERE chave = "moedas"', (moedas,))
+        self.connection.commit()
+
+    def obter_moedas(self):
+        """Obtém o total de moedas do jogador.
+        
+        Returns:
+            int: Total de moedas
+        """
+        self.cursor.execute('SELECT valor FROM configuracoes WHERE chave = "moedas"')
+        return int(self.cursor.fetchone()[0]) 

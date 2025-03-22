@@ -46,6 +46,23 @@ class Menu:
         rect_nome = texto_nome.get_rect(bottomright=(LARGURA - 20, ALTURA - 10))
         self.tela.blit(texto_nome, rect_nome)
 
+    def _desenhar_moedas(self):
+        """Método auxiliar para desenhar as moedas do jogador."""
+        # Carrega e redimensiona a imagem da moeda
+        imagem_moeda = pygame.image.load('assets/moeda.png')
+        imagem_moeda = pygame.transform.scale(imagem_moeda, (30, 30))
+        
+        # Obtém o total de moedas do banco de dados
+        from code.database import Database
+        db = Database()
+        moedas = db.obter_moedas()
+        db.fechar()
+        
+        # Renderiza a moeda e o número
+        self.tela.blit(imagem_moeda, (LARGURA - 100, 10))
+        texto_moedas = self.fonte.render(f': {moedas}', True, BRANCO)
+        self.tela.blit(texto_moedas, (LARGURA - 65, 10))
+
     def mostrar_menu_principal(self):
         """Mostra o menu principal do jogo."""
         opcao_selecionada = 0
@@ -64,8 +81,9 @@ class Menu:
                 rect = texto.get_rect(center=(LARGURA/2, ALTURA/2 + i * 50))
                 self.tela.blit(texto, rect)
             
-            # Adiciona os créditos
+            # Adiciona os créditos e moedas
             self._desenhar_creditos()
+            self._desenhar_moedas()
             
             pygame.display.update()
             
@@ -103,8 +121,9 @@ class Menu:
             rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
             self.tela.blit(titulo, rect_titulo)
             
-            # Adiciona os créditos
+            # Adiciona os créditos e moedas
             self._desenhar_creditos()
+            self._desenhar_moedas()
             
             pygame.display.update()
             
@@ -300,8 +319,9 @@ class Menu:
             rect = texto.get_rect(center=(LARGURA/2, ALTURA - 100))
             self.tela.blit(texto, rect)
             
-            # Adiciona os créditos
+            # Adiciona os créditos e moedas
             self._desenhar_creditos()
+            self._desenhar_moedas()
             
             pygame.display.update()
             
