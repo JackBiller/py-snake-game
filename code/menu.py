@@ -142,38 +142,70 @@ class Menu:
                         return 'VOLTAR'
 
     def mostrar_tela_final(self, db, pontuacao, velocidade, pausado=False):
-        """
-        Mostra a tela de fim de jogo com a pontuação.
-        
-        Args:
-            pontuacao: Pontuação final do jogador
-        """
+        """Mostra a tela final do jogo com a pontuação e opções."""
         opcao_selecionada = 0
         opcoes = ['MENU PRINCIPAL', 'JOGAR NOVAMENTE', 'SAIR']
+
+        # Carrega as imagens
+        imagem_maca = pygame.image.load('assets/maca.png')
+        imagem_maca = pygame.transform.scale(imagem_maca, (30, 30))
+        
+        imagem_moeda = pygame.image.load('assets/moeda.png')
+        imagem_moeda = pygame.transform.scale(imagem_moeda, (30, 30))
+        
+        # Obtém a velocidade atual do banco de dados
+        from code.database import Database
+        db = Database()
+        velocidade = db.obter_velocidade()
+        moedas_ganhas = db.calcular_moedas(pontuacao, velocidade)
+        db.fechar()
+        
+        # Define o texto da velocidade
+        if velocidade == 'LENTO':
+            velocidade_texto = 'LENTO'
+        elif velocidade == 'MODERADO':
+            velocidade_texto = 'MODERADO'
+        else:
+            velocidade_texto = 'RÁPIDO'
         
         while True:
             self._desenhar_fundo(self.imagem_fim)
             
-            texto_fim = self.fonte_grande.render('Fim de Jogo!', True, BRANCO)
-            if not pausado:
-                moedas_ganhas = db.calcular_moedas(pontuacao, velocidade)
-                texto_pontuacao = self.fonte.render(f'maças {pontuacao} => moedas {moedas_ganhas}', True, BRANCO)
-            else:
-                texto_pontuacao = self.fonte.render(f'Pontuação Final: {pontuacao} maçãs', True, BRANCO)
+            titulo = self.fonte_grande.render('FIM DE JOGO', True, BRANCO)
+            rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
+            self.tela.blit(titulo, rect_titulo)
 
+            if not pausado:            
+                # Renderiza a pontuação com o ícone da maçã
+                texto_pontuacao = self.fonte.render(f': {pontuacao}', True, BRANCO)
+                pos_x_maca = LARGURA/2 - 100
+                self.tela.blit(imagem_maca, (pos_x_maca, ALTURA/8 + 50))
+                self.tela.blit(texto_pontuacao, (pos_x_maca + 35, ALTURA/8 + 50))
+                
+                # Renderiza a seta de conversão
+                texto_seta = self.fonte.render('->', True, BRANCO)
+                self.tela.blit(texto_seta, (LARGURA/2 - 5, ALTURA/8 + 50))
+                
+                # Renderiza as moedas ganhas com o ícone da moeda
+                texto_moedas = self.fonte.render(f': {moedas_ganhas}', True, BRANCO)
+                pos_x_moeda = LARGURA/2 + 40
+                self.tela.blit(imagem_moeda, (pos_x_moeda, ALTURA/8 + 50))
+                self.tela.blit(texto_moedas, (pos_x_moeda + 35, ALTURA/8 + 50))
+            else:
+                texto_pontuacao = self.fonte.render(f': {pontuacao}', True, BRANCO)
+                pos_x_maca = LARGURA/2 - 35
+                self.tela.blit(imagem_maca, (pos_x_maca, ALTURA/8 + 50))
+                self.tela.blit(texto_pontuacao, (pos_x_maca + 35, ALTURA/8 + 50))
             
-            rect_fim = texto_fim.get_rect(center=(LARGURA/2, ALTURA/6.5))
-            rect_pontuacao = texto_pontuacao.get_rect(center=(LARGURA/2, ALTURA/6.5 + 50))
-            
-            self.tela.blit(texto_fim, rect_fim)
-            self.tela.blit(texto_pontuacao, rect_pontuacao)
-            
-            # Renderiza as opções com cores diferentes baseado na seleção
+            # Renderiza as opções
             for i, opcao in enumerate(opcoes):
                 cor = AMARELO if i == opcao_selecionada else BRANCO
                 texto = self.fonte.render(opcao, True, cor)
                 rect = texto.get_rect(center=(LARGURA/2, ALTURA/2 + 80 + i * 50))
                 self.tela.blit(texto, rect)
+            
+            # Adiciona os créditos
+            self._desenhar_creditos()
             
             pygame.display.update()
             
