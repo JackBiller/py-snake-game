@@ -141,7 +141,7 @@ class Menu:
                     elif evento.key == pygame.K_ESCAPE:
                         return 'VOLTAR'
 
-    def mostrar_tela_final(self, pontuacao):
+    def mostrar_tela_final(self, db, pontuacao, velocidade, pausado=False):
         """
         Mostra a tela de fim de jogo com a pontuação.
         
@@ -155,7 +155,12 @@ class Menu:
             self._desenhar_fundo(self.imagem_fim)
             
             texto_fim = self.fonte_grande.render('Fim de Jogo!', True, BRANCO)
-            texto_pontuacao = self.fonte.render(f'Pontuação Final: {pontuacao} maçãs', True, BRANCO)
+            if not pausado:
+                moedas_ganhas = db.calcular_moedas(pontuacao, velocidade)
+                texto_pontuacao = self.fonte.render(f'maças {pontuacao} => moedas {moedas_ganhas}', True, BRANCO)
+            else:
+                texto_pontuacao = self.fonte.render(f'Pontuação Final: {pontuacao} maçãs', True, BRANCO)
+
             
             rect_fim = texto_fim.get_rect(center=(LARGURA/2, ALTURA/6.5))
             rect_pontuacao = texto_pontuacao.get_rect(center=(LARGURA/2, ALTURA/6.5 + 50))

@@ -60,38 +60,30 @@ class Game:
                     return False
                 elif evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_ESCAPE:
-                        # Registra o tempo quando pausou
                         tempo_pausado = pygame.time.get_ticks()
-                        # Mostra o menu de pausa com o estado atual do jogo
                         escolha = self.menu.mostrar_menu_pausa(cobra, comida, pontuacao, velocidade_texto)
                         if escolha == 'ENCERRAR':
-                            # Calcula o tempo total de jogo em segundos
                             tempo_total = (pygame.time.get_ticks() - tempo_inicio - tempo_total_pausado) // 1000
-                            # Salva a pontuação antes de encerrar
                             self.db.salvar_partida(pontuacao, velocidade_texto, tempo_total)
-                            return self.menu.mostrar_tela_final(pontuacao)
-                        # Adiciona o tempo que ficou pausado ao total
+                            return self.menu.mostrar_tela_final(self.db, pontuacao, velocidade_texto, True)
                         tempo_total_pausado += pygame.time.get_ticks() - tempo_pausado
-                        continue  # Pula o resto do loop se estiver pausado
+                        continue 
                     else:
                         cobra.mudar_direcao(evento.key)
 
             cobra.mover()
 
-            # Verifica se a cobra coletou a maçã
             if cobra.posicao[0] == comida.posicao:
                 cobra.crescer()
                 comida = Comida(cobra)
                 pontuacao += 1
             
-            # Debug: Mostra as posições
             texto_debug = self.fonte.render(f'Cobra: {cobra.posicao[0]} Maçã: {comida.posicao}', True, BRANCO)
             self.tela.blit(texto_debug, (10, ALTURA - 30))
 
             if cobra.colisao():
                 rodando = False
 
-            # Desenha o fundo
             self.tela.blit(self.imagem_fundo, (0, 0))
             
             # Desenha a linha divisória
@@ -128,7 +120,9 @@ class Game:
         tempo_total = (pygame.time.get_ticks() - tempo_inicio - tempo_total_pausado) // 1000
         # Salva a pontuação ao fim do jogo
         self.db.salvar_partida(pontuacao, velocidade_texto, tempo_total)
-        return self.menu.mostrar_tela_final(pontuacao)
+        moedas_ganhas = self.db.calcular_moedas(pontuacao, velocidade)
+        self.db.adicionar_moedas(moedas_ganhas)
+        return self.menu.mostrar_tela_final(self.db, pontuacao, velocidade)
     
     def run(self):
         while self.jogando:
