@@ -34,6 +34,18 @@ class Menu:
         overlay.set_alpha(128)
         self.tela.blit(overlay, (0, 0))
 
+    def _desenhar_creditos(self):
+        """Método auxiliar para desenhar os créditos do aluno."""
+        # Renderiza o RU
+        texto_ru = self.fonte.render('RU: 3955575', True, BRANCO)
+        rect_ru = texto_ru.get_rect(bottomright=(LARGURA - 20, ALTURA - 30))
+        self.tela.blit(texto_ru, rect_ru)
+        
+        # Renderiza o nome
+        texto_nome = self.fonte.render('Jack Biller', True, BRANCO)
+        rect_nome = texto_nome.get_rect(bottomright=(LARGURA - 20, ALTURA - 10))
+        self.tela.blit(texto_nome, rect_nome)
+
     def mostrar_menu_principal(self):
         """Mostra o menu principal do jogo."""
         opcao_selecionada = 0
@@ -51,6 +63,9 @@ class Menu:
                 texto = self.fonte.render(opcao, True, cor)
                 rect = texto.get_rect(center=(LARGURA/2, ALTURA/2 + i * 50))
                 self.tela.blit(texto, rect)
+            
+            # Adiciona os créditos
+            self._desenhar_creditos()
             
             pygame.display.update()
             
@@ -87,6 +102,10 @@ class Menu:
             
             rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
             self.tela.blit(titulo, rect_titulo)
+            
+            # Adiciona os créditos
+            self._desenhar_creditos()
+            
             pygame.display.update()
             
             for evento in pygame.event.get():
@@ -237,8 +256,12 @@ class Menu:
         opcao_selecionada = 0
         opcoes = ['VOLTAR']
         
+        # Carrega a imagem de fundo específica para o histórico
+        imagem_fundo = pygame.image.load('assets/fundo-historico.png')
+        imagem_fundo = pygame.transform.scale(imagem_fundo, (LARGURA, ALTURA))
+        
         while True:
-            self._desenhar_fundo(self.imagem_menu)
+            self._desenhar_fundo(imagem_fundo)
             
             titulo = self.fonte_grande.render('MELHORES PONTUAÇÕES', True, VERDE)
             rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
@@ -276,6 +299,9 @@ class Menu:
             texto = self.fonte.render('VOLTAR', True, AMARELO)
             rect = texto.get_rect(center=(LARGURA/2, ALTURA - 100))
             self.tela.blit(texto, rect)
+            
+            # Adiciona os créditos
+            self._desenhar_creditos()
             
             pygame.display.update()
             
