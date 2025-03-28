@@ -29,6 +29,10 @@ class Menu:
         # Carrega o som de navegação
         self.som_navegacao = pygame.mixer.Sound('assets/option.mp3')
         self.som_navegacao.set_volume(0.5)  # 50% do volume máximo para o som de navegação
+        
+        # Carrega o som de select
+        self.som_select = pygame.mixer.Sound('assets/select.mp3')
+        self.som_select.set_volume(0.7)  # 70% do volume máximo para o som de seleção
 
     def _desenhar_fundo(self, imagem):
         """Método auxiliar para desenhar o fundo com overlay"""
@@ -543,7 +547,6 @@ class Menu:
                             # Verifica se está selecionada
                             if db.verificar_skin_selecionada(skin[0]):
                                 # Já está selecionada
-                                self.som_select.play()
                                 continue
                             else:
                                 # Seleciona a skin
