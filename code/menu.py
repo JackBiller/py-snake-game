@@ -26,6 +26,10 @@ class Menu:
         self.imagem_config = pygame.transform.scale(self.imagem_config, (LARGURA, ALTURA))
         self.imagem_fim = pygame.transform.scale(self.imagem_fim, (LARGURA, ALTURA))
 
+        # Carrega o som de navegação
+        self.som_navegacao = pygame.mixer.Sound('assets/option.mp3')
+        self.som_navegacao.set_volume(0.5)  # 50% do volume máximo para o som de navegação
+
     def _desenhar_fundo(self, imagem):
         """Método auxiliar para desenhar o fundo com overlay"""
         self.tela.blit(imagem, (0, 0))
@@ -94,8 +98,10 @@ class Menu:
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_UP:
                         opcao_selecionada = (opcao_selecionada - 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_DOWN:
                         opcao_selecionada = (opcao_selecionada + 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_RETURN:
                         return opcoes[opcao_selecionada]
                     elif evento.key == pygame.K_ESCAPE:
@@ -134,8 +140,10 @@ class Menu:
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_UP:
                         opcao_selecionada = (opcao_selecionada - 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_DOWN:
                         opcao_selecionada = (opcao_selecionada + 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_RETURN:
                         return opcoes[opcao_selecionada]
                     elif evento.key == pygame.K_ESCAPE:
@@ -216,8 +224,10 @@ class Menu:
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_UP:
                         opcao_selecionada = (opcao_selecionada - 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_DOWN:
                         opcao_selecionada = (opcao_selecionada + 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_RETURN:
                         if opcao_selecionada == 0:  # Menu Principal
                             return "menu"
@@ -300,8 +310,10 @@ class Menu:
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_UP:
                         opcao_selecionada = (opcao_selecionada - 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_DOWN:
                         opcao_selecionada = (opcao_selecionada + 1) % len(opcoes)
+                        self.som_navegacao.play()  # Toca o som ao navegar
                     elif evento.key == pygame.K_RETURN:
                         return opcoes[opcao_selecionada]
                     elif evento.key == pygame.K_ESCAPE:

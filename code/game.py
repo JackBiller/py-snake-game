@@ -29,9 +29,15 @@ class Game:
         self.imagem_fundo = pygame.image.load('assets/fundo-game.png')
         self.imagem_fundo = pygame.transform.scale(self.imagem_fundo, (LARGURA, ALTURA))
         
-        # Carrega o som de comer maçã e ajusta seu volume
+        # Carrega os sons e ajusta seus volumes
         self.som_comer = pygame.mixer.Sound('assets/come.mp3')
         self.som_comer.set_volume(1.0)  # Volume máximo para o som de comer
+        
+        self.som_over = pygame.mixer.Sound('assets/over.mp3')
+        self.som_over.set_volume(1.0)  # Volume máximo para o som de game over
+        
+        self.som_select = pygame.mixer.Sound('assets/select.mp3')
+        self.som_select.set_volume(0.7)  # 70% do volume máximo para o som de seleção
         
         # Carrega e inicia a música de fundo com volume reduzido
         pygame.mixer.music.load('assets/fundo.mp3')
@@ -93,6 +99,7 @@ class Game:
             self.tela.blit(texto_debug, (10, ALTURA - 30))
 
             if cobra.colisao():
+                self.som_over.play()  # Toca o som de game over
                 rodando = False
 
             self.tela.blit(self.imagem_fundo, (0, 0))
@@ -139,6 +146,7 @@ class Game:
         while self.jogando:
             if not self.jogar_novamente:
                 escolha_menu = self.menu.mostrar_menu_principal()
+                self.som_select.play()  # Toca o som quando seleciona uma opção no menu principal
             
             if escolha_menu == 'JOGAR' or self.jogar_novamente:
                 self.jogar_novamente = False
@@ -146,18 +154,23 @@ class Game:
                 if resultado == False:
                     self.jogando = False
                 elif resultado == "menu":
+                    self.som_select.play()  # Toca o som ao voltar ao menu
                     continue
                 elif resultado == "jogar":
                     self.jogar_novamente = True
+                    self.som_select.play()  # Toca o som ao escolher jogar novamente
                     continue
             
             elif escolha_menu == 'VELOCIDADE':
                 escolha_dif = self.menu.mostrar_velocidade()
                 if escolha_dif == 'LENTO':
+                    self.som_select.play()  # Toca o som ao selecionar velocidade
                     self.velocidade = 8
                 elif escolha_dif == 'MODERADO':
+                    self.som_select.play()  # Toca o som ao selecionar velocidade
                     self.velocidade = 10
                 elif escolha_dif == 'RÁPIDO':
+                    self.som_select.play()  # Toca o som ao selecionar velocidade
                     self.velocidade = 12
                 elif escolha_dif == 'VOLTAR':
                     continue
@@ -167,10 +180,12 @@ class Game:
                     self.db.salvar_velocidade(self.velocidade)
             
             elif escolha_menu == 'HISTÓRICO':
+                self.som_select.play()  # Toca o som ao selecionar histórico
                 self.menu.mostrar_historico()
                 continue
             
             elif escolha_menu == 'SAIR':
+                self.som_select.play()  # Toca o som ao selecionar sair
                 self.jogando = False
 
         # Fecha a conexão com o banco de dados ao sair
