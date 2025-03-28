@@ -179,6 +179,11 @@ class Game:
                 if escolha_dif != 'VOLTAR':
                     self.db.salvar_velocidade(self.velocidade)
             
+            elif escolha_menu == 'CONTROLES':
+                self.som_select.play()  # Toca o som ao selecionar controles
+                self.menu.mostrar_controles()
+                continue
+            
             elif escolha_menu == 'HISTÓRICO':
                 self.som_select.play()  # Toca o som ao selecionar histórico
                 self.menu.mostrar_historico()

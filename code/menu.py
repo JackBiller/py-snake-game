@@ -70,7 +70,7 @@ class Menu:
     def mostrar_menu_principal(self):
         """Mostra o menu principal do jogo."""
         opcao_selecionada = 0
-        opcoes = ['JOGAR', 'VELOCIDADE', 'HISTÓRICO', 'SAIR']
+        opcoes = ['JOGAR', 'VELOCIDADE', 'CONTROLES', 'HISTÓRICO', 'SAIR']
         
         while True:
             self._desenhar_fundo(self.imagem_menu)
@@ -362,6 +362,60 @@ class Menu:
                 except Exception as e:
                     print(f"Erro ao processar data/hora: {e}")
                     continue
+            
+            # Renderiza a opção de voltar
+            texto = self.fonte.render('VOLTAR', True, AMARELO)
+            rect = texto.get_rect(center=(LARGURA/2, ALTURA - 100))
+            self.tela.blit(texto, rect)
+            
+            # Adiciona os créditos e moedas
+            self._desenhar_creditos()
+            self._desenhar_moedas()
+            
+            pygame.display.update()
+            
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    return 'VOLTAR'
+                
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_RETURN or evento.key == pygame.K_ESCAPE:
+                        return 'VOLTAR'
+
+    def mostrar_controles(self):
+        """Mostra a tela de controles do jogo."""
+        opcao_selecionada = 0
+        opcoes = ['VOLTAR']
+        
+        # Carrega a imagem de fundo específica para os controles
+        imagem_fundo = pygame.image.load('assets/fundo-config.png')
+        imagem_fundo = pygame.transform.scale(imagem_fundo, (LARGURA, ALTURA))
+        
+        while True:
+            self._desenhar_fundo(imagem_fundo)
+            
+            titulo = self.fonte_grande.render('CONTROLES', True, VERDE)
+            rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
+            self.tela.blit(titulo, rect_titulo)
+            
+            # Renderiza as instruções de controle
+            instrucoes = [
+                "Use as SETAS do teclado para mover a cobra:",
+                "^ - Move para cima",
+                "v - Move para baixo",
+                "< - Move para a esquerda", 
+                "> - Move para a direita",
+                "",
+                "Outros controles:",
+                "ESC - Pausa o jogo",
+                "ENTER - Seleciona opções nos menus"
+            ]
+            
+            for i, texto in enumerate(instrucoes):
+                cor = BRANCO
+                texto_surface = self.fonte.render(texto, True, cor)
+                rect = texto_surface.get_rect(center=(LARGURA/2, ALTURA/4 + i * 40))
+                self.tela.blit(texto_surface, rect)
             
             # Renderiza a opção de voltar
             texto = self.fonte.render('VOLTAR', True, AMARELO)
