@@ -9,6 +9,7 @@ from code.database import Database
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()  # Inicializa o módulo de áudio
 
         self.tela = pygame.display.set_mode((LARGURA, ALTURA))
         pygame.display.set_caption('Jogo da Cobrinha')
@@ -27,6 +28,15 @@ class Game:
         # Carrega e redimensiona a imagem de fundo
         self.imagem_fundo = pygame.image.load('assets/fundo-game.png')
         self.imagem_fundo = pygame.transform.scale(self.imagem_fundo, (LARGURA, ALTURA))
+        
+        # Carrega o som de comer maçã e ajusta seu volume
+        self.som_comer = pygame.mixer.Sound('assets/come.mp3')
+        self.som_comer.set_volume(1.0)  # Volume máximo para o som de comer
+        
+        # Carrega e inicia a música de fundo com volume reduzido
+        pygame.mixer.music.load('assets/fundo.mp3')
+        pygame.mixer.music.set_volume(0.3)  # 30% do volume máximo para a música de fundo
+        pygame.mixer.music.play(-1)  # -1 faz a música tocar em loop infinito
         
         # Inicializa o banco de dados e carrega a última velocidade configurada
         self.db = Database()
@@ -77,6 +87,7 @@ class Game:
                 cobra.crescer()
                 comida = Comida(cobra)
                 pontuacao += 1
+                self.som_comer.play()  # Toca o som quando come a maçã
             
             texto_debug = self.fonte.render(f'Cobra: {cobra.posicao[0]} Maçã: {comida.posicao}', True, BRANCO)
             self.tela.blit(texto_debug, (10, ALTURA - 30))
@@ -164,4 +175,5 @@ class Game:
 
         # Fecha a conexão com o banco de dados ao sair
         self.db.fechar()
+        pygame.mixer.music.stop()  # Para a música de fundo antes de fechar
         pygame.quit()
