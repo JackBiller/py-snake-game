@@ -488,8 +488,8 @@ class Menu:
                 # Carrega e desenha a imagem da cobrinha
                 sprite_sheet = pygame.image.load(f'assets/{skin[2]}')
                 sprites_cobra = []
-                for i in range(7):
-                    sprite = sprite_sheet.subsurface((0, i * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE))
+                for j in range(7):
+                    sprite = sprite_sheet.subsurface((0, j * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE))
                     sprite = pygame.transform.scale(sprite, (TAMANHO_BLOCO, TAMANHO_BLOCO))
                     sprites_cobra.append(sprite)
 
@@ -515,11 +515,9 @@ class Menu:
                     (-TAMANHO_BLOCO, 0): 90,  # Esquerda
                     (TAMANHO_BLOCO, 0): 270   # Direita
                 }
-                for i, posicao in enumerate(self.posicao):
-                    sprite = self.obter_sprite_parte(i)
+                for j, posicao in enumerate(self.posicao):
+                    sprite = self.obter_sprite_parte(j)
                     self.tela.blit(sprite, posicao)
-                # imagem_cobra = pygame.transform.scale(imagem_cobra, (100, 100))
-                # self.tela.blit(imagem_cobra, (x + 20, y + 25))
                 
                 # Desenha o nome da skin
                 texto_nome = self.fonte.render(skin[1], True, BRANCO)
