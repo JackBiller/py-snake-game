@@ -470,11 +470,16 @@ class Menu:
             # Desenha os cards das skins
             for i, skin in enumerate(skins):
                 # Calcula a posição do card
-                x = LARGURA/2 - 410 if i % 2 == 0 else LARGURA/2 + 10
-                y = ALTURA/3 if i < 2 else ALTURA/2 + 50
+                x = LARGURA/2 - 310 if i % 2 == 0 else LARGURA/2 + 10
+                y = ALTURA/5 if i < 2 else ALTURA/3 + 100
                 
                 # Desenha o card
-                pygame.draw.rect(self.tela, CINZA, (x, y, 400, 150), 2)
+                # Cria uma superfície semi-transparente para o fundo do card
+                card_fundo = pygame.Surface((300, 150))
+                card_fundo.fill(PRETO)
+                card_fundo.set_alpha(50)  # 50 é aproximadamente 20% de opacidade
+                self.tela.blit(card_fundo, (x, y))
+                pygame.draw.rect(self.tela, CINZA, (x, y, 300, 150), 2)
                 
                 # Carrega e desenha a imagem da cobrinha
                 imagem_cobra = pygame.image.load(f'assets/{skin[2]}')
@@ -487,18 +492,21 @@ class Menu:
                 
                 # Verifica se está selecionada
                 if skin[5]:  # selecionada
-                    texto_status = self.fonte.render('SELECIONADA', True, VERDE)
+                    texto_status = pygame.font.SysFont('Lucida Sans Typewriter', 24).render('SELECIONADA', True, VERDE)
                 elif skin[4]:  # desbloqueada
-                    texto_status = self.fonte.render('DESBLOQUEADA', True, AZUL)
+                    texto_status = pygame.font.SysFont('Lucida Sans Typewriter', 24).render('DESBLOQUEADA', True, AZUL)
                 else:  # bloqueada
-                    texto_status = self.fonte.render(f'{skin[3]} moedas', True, AMARELO)
-                    self.tela.blit(imagem_moeda, (x + 140, y + 80))
+                    texto_status = pygame.font.SysFont('Lucida Sans Typewriter', 24).render(f'{skin[3]} moedas', True, AMARELO)
+                    self.tela.blit(imagem_moeda, (x + 140, y + 90))
                 
-                self.tela.blit(texto_status, (x + 140, y + 80))
+                if skin[5] or skin[4]:
+                    self.tela.blit(texto_status, (x + 140, y + 90))
+                else:
+                    self.tela.blit(texto_status, (x + 180, y + 90))
                 
                 # Destaca o card selecionado
                 if i == opcao_selecionada:
-                    pygame.draw.rect(self.tela, AMARELO, (x, y, 400, 150), 3)
+                    pygame.draw.rect(self.tela, AMARELO, (x, y, 300, 150), 3)
             
             # Renderiza a opção de voltar
             texto = self.fonte.render('VOLTAR', True, AMARELO if opcao_selecionada == len(skins) else BRANCO)
