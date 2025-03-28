@@ -33,6 +33,10 @@ class Menu:
         # Carrega o som de select
         self.som_select = pygame.mixer.Sound('assets/select.mp3')
         self.som_select.set_volume(0.7)  # 70% do volume máximo para o som de seleção
+        
+        # Carrega o som de select
+        self.som_coin = pygame.mixer.Sound('assets/coin.mp3')
+        self.som_coin.set_volume(0.7)  # 70% do volume máximo para o som de seleção
 
     def _desenhar_fundo(self, imagem):
         """Método auxiliar para desenhar o fundo com overlay"""
@@ -443,10 +447,9 @@ class Menu:
     def mostrar_shop(self):
         """Mostra a tela de shop para comprar skins."""
         opcao_selecionada = 0
-        opcoes = ['VOLTAR']
         
         # Carrega a imagem de fundo específica para o shop
-        imagem_fundo = pygame.image.load('assets/fundo-config.png')
+        imagem_fundo = pygame.image.load('assets/fundo-shop.png')
         imagem_fundo = pygame.transform.scale(imagem_fundo, (LARGURA, ALTURA))
         
         # Carrega a imagem da moeda
@@ -593,8 +596,10 @@ class Menu:
                                     # Compra a skin
                                     db.adicionar_moedas(-preco)
                                     db.desbloquear_skin(skin[0])
-                                    self.som_select.play()
-                                    continue
+                                    db.selecionar_skin(skin[0])
+                                    cobra.atualizar_skin()
+                                    self.som_coin.play()
+                                    return 'VOLTAR'
                             else:
                                 # Moedas insuficientes
                                 self._mostrar_mensagem('Moedas insuficientes!')
@@ -641,6 +646,9 @@ class Menu:
         """Mostra uma mensagem na tela."""
         texto = self.fonte.render(mensagem, True, BRANCO)
         rect = texto.get_rect(center=(LARGURA/2, ALTURA/2))
+
+        texto_instrucoes = self.fonte.render('ESC - Sair', True, BRANCO)
+        rect_instrucoes = texto_instrucoes.get_rect(center=(LARGURA/2, ALTURA/2 + 40))
         
         # Desenha um fundo semi-transparente
         overlay = pygame.Surface((LARGURA, ALTURA))
@@ -650,10 +658,17 @@ class Menu:
         
         # Desenha a mensagem
         self.tela.blit(texto, rect)
+        self.tela.blit(texto_instrucoes, rect_instrucoes)
         pygame.display.update()
-        
-        # Aguarda um momento
-        pygame.time.wait(2000) 
+
+        while True:
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    return False
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_ESCAPE:
+                        return False
+            pygame.time.wait(100)
 
     def obter_sprite_parte(self, indice):
         if indice == 0:  # Cabeça
