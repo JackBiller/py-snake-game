@@ -585,6 +585,12 @@ class Menu:
         
         # Desenha a mensagem
         self.tela.blit(texto, rect)
+        
+        # Adiciona as instruções de confirmação
+        texto_instrucoes = self.fonte.render('ENTER - Comprar | ESC - Sair', True, BRANCO)
+        rect_instrucoes = texto_instrucoes.get_rect(center=(LARGURA/2, ALTURA/2 + 40))
+        self.tela.blit(texto_instrucoes, rect_instrucoes)
+        
         pygame.display.update()
         
         # Aguarda a resposta do usuário
