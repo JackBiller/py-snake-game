@@ -1,9 +1,16 @@
 import pygame
 from code.const import *
+from code.database import Database
 
 class Cobrinha:
     def __init__(self):
-        sprite_sheet = pygame.image.load('assets/cobrinha-marrom.png')
+        # Obtém a skin selecionada do banco de dados
+        db = Database()
+        skin = db.obter_skin_selecionada()
+        db.fechar()
+        
+        # Carrega a sprite sheet da skin selecionada
+        sprite_sheet = pygame.image.load(f'assets/{skin[2]}')
         sprites_cobra = []
         for i in range(7):
             sprite = sprite_sheet.subsurface((0, i * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE))
@@ -55,6 +62,21 @@ class Cobrinha:
         if self.posicao[0] in self.posicao[1:]:
             return True
         return False
+
+    def atualizar_skin(self):
+        """Atualiza a skin da cobrinha com a selecionada no banco de dados."""
+        # Obtém a skin selecionada do banco de dados
+        db = Database()
+        skin = db.obter_skin_selecionada()
+        db.fechar()
+        
+        # Carrega a sprite sheet da skin selecionada
+        sprite_sheet = pygame.image.load(f'assets/{skin[2]}')
+        self.sprites = []
+        for i in range(7):
+            sprite = sprite_sheet.subsurface((0, i * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE))
+            sprite = pygame.transform.scale(sprite, (TAMANHO_BLOCO, TAMANHO_BLOCO))
+            self.sprites.append(sprite)
 
     def obter_sprite_parte(self, indice):
         if indice == 0:  # Cabeça

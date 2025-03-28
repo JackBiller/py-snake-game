@@ -51,9 +51,10 @@ class Game:
         self.jogando = True
         self.jogar_novamente = False
 
-    def jogar(self, velocidade=10):
+    def jogar(self, velocidade=10, cobra=None):
         clock = pygame.time.Clock()
-        cobra = Cobrinha()
+        if cobra is None:
+            cobra = Cobrinha()
         comida = Comida(cobra)
         pontuacao = 0
         rodando = True
@@ -83,6 +84,8 @@ class Game:
                             self.db.salvar_partida(pontuacao, velocidade_texto, tempo_total)
                             return self.menu.mostrar_tela_final(self.db, pontuacao, velocidade_texto, True)
                         tempo_total_pausado += pygame.time.get_ticks() - tempo_pausado
+                        # Atualiza a skin da cobrinha após voltar do menu de pausa
+                        cobra.atualizar_skin()
                         continue 
                     else:
                         cobra.mudar_direcao(evento.key)
@@ -150,7 +153,9 @@ class Game:
             
             if escolha_menu == 'JOGAR' or self.jogar_novamente:
                 self.jogar_novamente = False
-                resultado = self.jogar(self.velocidade)
+                # Cria uma instância da cobrinha para atualizar a skin
+                cobra = Cobrinha()
+                resultado = self.jogar(self.velocidade, cobra)
                 if resultado == False:
                     self.jogando = False
                 elif resultado == "menu":
@@ -159,6 +164,13 @@ class Game:
                 elif resultado == "jogar":
                     self.jogar_novamente = True
                     self.som_select.play()  # Toca o som ao escolher jogar novamente
+                    # Atualiza a skin da cobrinha antes de reiniciar o jogo
+                    cobra.atualizar_skin()
+                    continue
+                elif resultado == "menu":
+                    self.som_select.play()  # Toca o som ao voltar ao menu
+                    # Atualiza a skin da cobrinha antes de voltar ao menu
+                    cobra.atualizar_skin()
                     continue
             
             elif escolha_menu == 'VELOCIDADE':
@@ -187,6 +199,11 @@ class Game:
             elif escolha_menu == 'HISTÓRICO':
                 self.som_select.play()  # Toca o som ao selecionar histórico
                 self.menu.mostrar_historico()
+                continue
+            
+            elif escolha_menu == 'SHOP':
+                self.som_select.play()  # Toca o som ao selecionar shop
+                self.menu.mostrar_shop()
                 continue
             
             elif escolha_menu == 'SAIR':

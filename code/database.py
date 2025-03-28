@@ -119,6 +119,37 @@ class Database:
                 # Renomeia a tabela temporária
                 self.cursor.execute('ALTER TABLE configuracoes_temp RENAME TO configuracoes')
 
+        # Verifica se a tabela skins existe
+        self.cursor.execute('''
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name='skins'
+        ''')
+        tabela_existe = self.cursor.fetchone() is not None
+        
+        if not tabela_existe:
+            self.cursor.execute('''
+                CREATE TABLE skins (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    arquivo TEXT NOT NULL,
+                    preco INTEGER NOT NULL,
+                    desbloqueada BOOLEAN NOT NULL DEFAULT 0,
+                    selecionada BOOLEAN NOT NULL DEFAULT 0
+                )
+            ''')
+            self.connection.commit()
+            
+            # Insere as skins padrão
+            self.cursor.execute('''
+                INSERT INTO skins (nome, arquivo, preco, desbloqueada, selecionada)
+                VALUES 
+                ('Verde', 'cobrinha-verde.png', 0, 1, 1),
+                ('Azul', 'cobrinha-azul.png', 100, 0, 0),
+                ('Rosa', 'cobrinha-rosa.png', 500, 0, 0),
+                ('Marrom', 'cobrinha-marrom.png', 1000, 0, 0)
+            ''')
+            self.connection.commit()
+
         self.connection.commit()
 
     def salvar_partida(self, pontuacao, velocidade_texto, tempo_jogo):
@@ -218,4 +249,45 @@ class Database:
             int: Total de moedas
         """
         self.cursor.execute('SELECT valor FROM configuracoes WHERE chave = "moedas"')
-        return int(self.cursor.fetchone()[0]) 
+        return int(self.cursor.fetchone()[0])
+
+    def obter_skins(self):
+        """Retorna todas as skins disponíveis."""
+        self.cursor.execute('SELECT * FROM skins')
+        return self.cursor.fetchall()
+
+    def obter_skin_selecionada(self):
+        """Retorna a skin atualmente selecionada."""
+        self.cursor.execute('SELECT * FROM skins WHERE selecionada = 1')
+        return self.cursor.fetchone()
+
+    def selecionar_skin(self, skin_id):
+        """Seleciona uma skin específica."""
+        # Desmarca todas as skins
+        self.cursor.execute('UPDATE skins SET selecionada = 0')
+        # Marca a skin escolhida como selecionada
+        self.cursor.execute('UPDATE skins SET selecionada = 1 WHERE id = ?', (skin_id,))
+        self.connection.commit()
+
+    def desbloquear_skin(self, skin_id):
+        """Desbloqueia uma skin específica."""
+        self.cursor.execute('UPDATE skins SET desbloqueada = 1 WHERE id = ?', (skin_id,))
+        self.connection.commit()
+
+    def verificar_skin_desbloqueada(self, skin_id):
+        """Verifica se uma skin está desbloqueada."""
+        self.cursor.execute('SELECT desbloqueada FROM skins WHERE id = ?', (skin_id,))
+        resultado = self.cursor.fetchone()
+        return resultado[0] if resultado else False
+
+    def verificar_skin_selecionada(self, skin_id):
+        """Verifica se uma skin está selecionada."""
+        self.cursor.execute('SELECT selecionada FROM skins WHERE id = ?', (skin_id,))
+        resultado = self.cursor.fetchone()
+        return resultado[0] if resultado else False
+
+    def obter_preco_skin(self, skin_id):
+        """Retorna o preço de uma skin."""
+        self.cursor.execute('SELECT preco FROM skins WHERE id = ?', (skin_id,))
+        resultado = self.cursor.fetchone()
+        return resultado[0] if resultado else 0 

@@ -70,7 +70,7 @@ class Menu:
     def mostrar_menu_principal(self):
         """Mostra o menu principal do jogo."""
         opcao_selecionada = 0
-        opcoes = ['JOGAR', 'VELOCIDADE', 'CONTROLES', 'HISTÓRICO', 'SAIR']
+        opcoes = ['JOGAR', 'VELOCIDADE', 'CONTROLES', 'HISTÓRICO', 'SHOP', 'SAIR']
         
         while True:
             self._desenhar_fundo(self.imagem_menu)
@@ -434,4 +434,177 @@ class Menu:
                 
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_RETURN or evento.key == pygame.K_ESCAPE:
-                        return 'VOLTAR' 
+                        return 'VOLTAR'
+
+    def mostrar_shop(self):
+        """Mostra a tela de shop para comprar skins."""
+        opcao_selecionada = 0
+        opcoes = ['VOLTAR']
+        
+        # Carrega a imagem de fundo específica para o shop
+        imagem_fundo = pygame.image.load('assets/fundo-config.png')
+        imagem_fundo = pygame.transform.scale(imagem_fundo, (LARGURA, ALTURA))
+        
+        # Carrega a imagem da moeda
+        imagem_moeda = pygame.image.load('assets/moeda.png')
+        imagem_moeda = pygame.transform.scale(imagem_moeda, (30, 30))
+        
+        # Obtém as skins do banco de dados
+        from code.database import Database
+        db = Database()
+        skins = db.obter_skins()
+        moedas = db.obter_moedas()
+        db.fechar()
+        
+        # Cria uma instância da cobrinha para atualizar a skin
+        from code.cobrinha import Cobrinha
+        cobra = Cobrinha()
+        
+        while True:
+            self._desenhar_fundo(imagem_fundo)
+            
+            titulo = self.fonte_grande.render('SHOP DE SKINS', True, VERDE)
+            rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
+            self.tela.blit(titulo, rect_titulo)
+            
+            # Desenha os cards das skins
+            for i, skin in enumerate(skins):
+                # Calcula a posição do card
+                x = LARGURA/2 - 410 if i % 2 == 0 else LARGURA/2 + 10
+                y = ALTURA/3 if i < 2 else ALTURA/2 + 50
+                
+                # Desenha o card
+                pygame.draw.rect(self.tela, CINZA, (x, y, 400, 150), 2)
+                
+                # Carrega e desenha a imagem da cobrinha
+                imagem_cobra = pygame.image.load(f'assets/{skin[2]}')
+                imagem_cobra = pygame.transform.scale(imagem_cobra, (100, 100))
+                self.tela.blit(imagem_cobra, (x + 20, y + 25))
+                
+                # Desenha o nome da skin
+                texto_nome = self.fonte.render(skin[1], True, BRANCO)
+                self.tela.blit(texto_nome, (x + 140, y + 30))
+                
+                # Verifica se está selecionada
+                if skin[5]:  # selecionada
+                    texto_status = self.fonte.render('SELECIONADA', True, VERDE)
+                elif skin[4]:  # desbloqueada
+                    texto_status = self.fonte.render('DESBLOQUEADA', True, AZUL)
+                else:  # bloqueada
+                    texto_status = self.fonte.render(f'{skin[3]} moedas', True, AMARELO)
+                    self.tela.blit(imagem_moeda, (x + 140, y + 80))
+                
+                self.tela.blit(texto_status, (x + 140, y + 80))
+                
+                # Destaca o card selecionado
+                if i == opcao_selecionada:
+                    pygame.draw.rect(self.tela, AMARELO, (x, y, 400, 150), 3)
+            
+            # Renderiza a opção de voltar
+            texto = self.fonte.render('VOLTAR', True, AMARELO if opcao_selecionada == len(skins) else BRANCO)
+            rect = texto.get_rect(center=(LARGURA/2, ALTURA - 100))
+            self.tela.blit(texto, rect)
+            
+            # Adiciona os créditos e moedas
+            self._desenhar_creditos()
+            self._desenhar_moedas()
+            
+            pygame.display.update()
+            
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    return 'VOLTAR'
+                
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_UP:
+                        opcao_selecionada = (opcao_selecionada - 1) % (len(skins) + 1)
+                        self.som_navegacao.play()
+                    elif evento.key == pygame.K_DOWN:
+                        opcao_selecionada = (opcao_selecionada + 1) % (len(skins) + 1)
+                        self.som_navegacao.play()
+                    elif evento.key == pygame.K_RETURN:
+                        if opcao_selecionada == len(skins):  # Opção voltar
+                            return 'VOLTAR'
+                        
+                        # Obtém informações da skin selecionada
+                        skin = skins[opcao_selecionada]
+                        db = Database()
+                        
+                        # Verifica se está desbloqueada
+                        if db.verificar_skin_desbloqueada(skin[0]):
+                            # Verifica se está selecionada
+                            if db.verificar_skin_selecionada(skin[0]):
+                                # Já está selecionada
+                                self.som_select.play()
+                                continue
+                            else:
+                                # Seleciona a skin
+                                db.selecionar_skin(skin[0])
+                                # Atualiza a skin da cobrinha
+                                cobra.atualizar_skin()
+                                self.som_select.play()
+                                return 'VOLTAR'
+                        else:
+                            # Verifica se tem moedas suficientes
+                            preco = db.obter_preco_skin(skin[0])
+                            if moedas >= preco:
+                                # Pergunta se deseja comprar
+                                if self._confirmar_compra(preco):
+                                    # Compra a skin
+                                    db.adicionar_moedas(-preco)
+                                    db.desbloquear_skin(skin[0])
+                                    self.som_select.play()
+                                    continue
+                            else:
+                                # Moedas insuficientes
+                                self._mostrar_mensagem('Moedas insuficientes!')
+                        
+                        db.fechar()
+                    elif evento.key == pygame.K_ESCAPE:
+                        return 'VOLTAR'
+
+    def _confirmar_compra(self, preco):
+        """Mostra uma mensagem de confirmação de compra."""
+        mensagem = f'Deseja comprar por {preco} moedas?'
+        texto = self.fonte.render(mensagem, True, BRANCO)
+        rect = texto.get_rect(center=(LARGURA/2, ALTURA/2))
+        
+        # Desenha um fundo semi-transparente
+        overlay = pygame.Surface((LARGURA, ALTURA))
+        overlay.fill(PRETO)
+        overlay.set_alpha(128)
+        self.tela.blit(overlay, (0, 0))
+        
+        # Desenha a mensagem
+        self.tela.blit(texto, rect)
+        pygame.display.update()
+        
+        # Aguarda a resposta do usuário
+        while True:
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    return False
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_RETURN:
+                        return True
+                    elif evento.key == pygame.K_ESCAPE:
+                        return False
+            pygame.time.wait(100)
+
+    def _mostrar_mensagem(self, mensagem):
+        """Mostra uma mensagem na tela."""
+        texto = self.fonte.render(mensagem, True, BRANCO)
+        rect = texto.get_rect(center=(LARGURA/2, ALTURA/2))
+        
+        # Desenha um fundo semi-transparente
+        overlay = pygame.Surface((LARGURA, ALTURA))
+        overlay.fill(PRETO)
+        overlay.set_alpha(128)
+        self.tela.blit(overlay, (0, 0))
+        
+        # Desenha a mensagem
+        self.tela.blit(texto, rect)
+        pygame.display.update()
+        
+        # Aguarda um momento
+        pygame.time.wait(2000) 
