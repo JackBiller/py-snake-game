@@ -76,7 +76,7 @@ class Menu:
             self._desenhar_fundo(self.imagem_menu)
             
             titulo = self.fonte_grande.render('JOGO DA COBRINHA', True, VERDE)
-            rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/4))
+            rect_titulo = titulo.get_rect(center=(LARGURA/2, ALTURA/8))
             self.tela.blit(titulo, rect_titulo)
             
             for i, opcao in enumerate(opcoes):
