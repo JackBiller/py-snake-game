@@ -1,0 +1,7 @@
+RU: 395575
+Jack Biller da Silva Prado
+
+O código do jogo está disponivel no Github:
+https://github.com/JackBiller/py-snake-game
+
+OBS: Dependendo de onde abrir o arquivo tem que executa-lo com permissão de administrador, pois o jogo utiliza banco de dados local e para isso, precisa de permissão de escrita de arquivo para rodar o jogo.
