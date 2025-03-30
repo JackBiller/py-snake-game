@@ -1,4 +1,4 @@
-RU: 395575
+RU: 3955575
 Jack Biller da Silva Prado
 
 O código do jogo está disponivel no Github:

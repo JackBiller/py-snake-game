@@ -8,7 +8,7 @@ Este projeto foi desenvolvido como parte da disciplina de **Linguagem de Program
 
 ### 👨‍🎓 Aluno
 - **Nome**: Jack Biller
-- **RU**: 1234567
+- **RU**: 3955575
 
 ## 🎮 Funcionalidades
 
