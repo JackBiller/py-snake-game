@@ -222,15 +222,13 @@ class Database:
         Returns:
             int: Número de moedas ganhas
         """
-        # Define os pesos para cada velocidade
-        pesos = {
-            'LENTO': 1,
-            'MODERADO': 2,
-            'RÁPIDO': 3
-        }
-        
         # Calcula as moedas baseado na pontuação e velocidade
-        moedas = pontuacao * pesos.get(velocidade, 1)
+        peso = 1
+        if velocidade == 10:
+            peso = 2
+        elif velocidade == 12:
+            peso = 3
+        moedas = pontuacao * peso
         return moedas
 
     def adicionar_moedas(self, moedas):
